@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PERI GPA Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+        }
+
+        /* HOME */
+        #home {
+            height: 100vh;
+            background: linear-gradient(to right,#007bff,#00c6ff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 20px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.1);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .btn {
+            padding: 12px;
+            margin: 10px 0;
+            width: 100%;
+            border: none;
+            border-radius: 25px;
+            background: white;
+            color: #007bff;
+            font-size: 16px;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+            color: white;
+        }
+
+        /* CALCULATOR */
+        #calculator {
+            display: none;
+            background: #f4f6f8;
+            min-height: 100vh;
+            padding: 10px;
+            text-align: center;
+        }
+
+        select, button {
+            width: 90%;
+            padding: 10px;
+            margin: 8px;
+            font-size: 14px;
+        }
+
+        /* TABLE SCROLL */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 650px;
+            background: white;
+        }
+
+        th, td {
+            padding: 8px;
+            border: 1px solid #333;
+            font-size: 13px;
+        }
+
+        th {
+            background: #007bff;
+            color: white;
+        }
+
+        #result, #cgpaResult {
+            font-size: 16px;
+            color: green;
+        }
+
+        @media(min-width:768px){
+            th, td { font-size:15px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- HOME -->
+<div id="home">
+    <div class="card">
+        <h1>🎓 PERI GPA Portal</h1>
+        <p>CSE GPA & CGPA Calculator (Sem 1–8)</p>
+        <button class="btn" onclick="openCalc()">Open Calculator</button>
+    </div>
+</div>
+
+<!-- CALCULATOR -->
+<div id="calculator">
+
+<h2>CSE GPA & CGPA Calculator</h2>
+
+<select id="sem" onchange="loadSemester()">
+    <option value="1">Semester 1</option>
+    <option value="2">Semester 2</option>
+    <option value="3">Semester 3</option>
+    <option value="4">Semester 4</option>
+    <option value="5">Semester 5</option>
+    <option value="6">Semester 6</option>
+    <option value="7">Semester 7</option>
+    <option value="8">Semester 8</option>
+</select>
+
+<div class="table-container">
+<table id="table">
+<tr>
+<th>Code</th>
+<th>Subject</th>
+<th>Credits</th>
+<th>Grade</th>
+</tr>
+</table>
+</div>
+
+<button onclick="calculateGPA()">Calculate GPA</button>
+<h3 id="result"></h3>
+
+<button onclick="calculateCGPA()">Calculate CGPA</button>
+<h3 id="cgpaResult"></h3>
+
+<button onclick="goHome()">⬅ Back to Home</button>
+
+</div>
+
+<script>
+
+// NAVIGATION
+function openCalc(){
+    document.getElementById("home").style.display="none";
+    document.getElementById("calculator").style.display="block";
+    loadSemester();
+}
+
+function goHome(){
+    document.getElementById("home").style.display="flex";
+    document.getElementById("calculator").style.display="none";
+}
+
+// DATA (ALL 8 SEM WITH CODES)
+const data = {
+
+1:[
+["24SH108106","Life Skills - I",2],
+["24SH108108","Personal and Professional Competencies for Engineers",2],
+["24SH101105","Engineering Mathematics - I",4],
+["24CS101101","Introduction to Advanced Computer Technologies",3],
+["24CS101102","Fundamentals of Programming for Problem Solving",3],
+["24EE101102","Basic Electrical and Electronics Engineering",4],
+["24SH102104","Engineering Chemistry",4],
+["24CS103103","Basic Programming Lab",2],
+["24SH108107","Communication Lab - I",1]
+],
+
+2:[
+["24SH108205","Life Skills - II",2],
+["24SH101206","Tamil and Technology",1],
+["24ME105201","Engineering Graphics and Design",4],
+["24CS101201","Python Programming",3],
+["24SH102201","Physics for Information Science",4],
+["24SH102202","Engineering Mathematics - II",4],
+["24CS103202","Python Programming Lab",2],
+["24ME103203","IDEA Lab Workshop",2],
+["24SH108207","Communication Lab - II",1],
+["24SH112203","Environmental Science and Engineering",0]
+],
+
+3:[
+["24MA306","Discrete Mathematics",4],
+["24CS304","Computer Architecture",3],
+["24HSS03","Life Skill - III",1],
+["24GSS02","Invention Principles and Practices",1],
+["24CSC03","Digital Principles and Computer Organization",4],
+["24CS305","Object Oriented Programming using Java",4],
+["24CS306","Data Structures",4],
+["24CS307","Foundations of Data Science",4],
+["24GSM02","Indian Constitution",0]
+],
+
+4:[
+["24CS408","Software Engineering",3],
+["24CS409","Design and Analysis of Algorithms",3],
+["24HSS04","Life Skill - IV",1],
+["24GSS03","Holistic Personality Development",1],
+["24CS410","Operating Systems",4],
+["24CS411","Computer Networks",4],
+["24AD302","Advanced Python Programming",4],
+["24GSM03","Social Services",0]
+],
+
+5:[
+["24CS512","Artificial Intelligence and Machine Learning",3],
+["24CS513","Theory of Computation",3],
+["24CS514","Cryptography and Network Security",3],
+["24HSS05","Life Skill - V",1],
+["24GSV01","Quantitative Aptitude - I",1],
+["24AD507","Database Management Systems",4]
+],
+
+6:[
+["24CS615","Compiler Design",3],
+["24SC301","Introduction to Cyber Security",3],
+["24CS616","Object Oriented Analysis and Design",3],
+["24CS617","Cloud Computing",3],
+["24HSS06","Life Skill - VI",1]
+],
+
+7:[
+["OE-III","Open Elective - III",3],
+["PE-IV","Professional Elective - IV",4]
+],
+
+8:[
+["MGMT","Management",3],
+["HVE","Human Values and Ethics",3],
+["24CS820","Project Work - Phase II",10]
+]
+
+};
+
+let gpaStore={};
+
+// LOAD SUBJECTS
+function loadSemester(){
+    let sem=document.getElementById("sem").value;
+    let table=document.getElementById("table");
+
+    table.innerHTML=`<tr>
+    <th>Code</th><th>Subject</th><th>Credits</th><th>Grade</th></tr>`;
+
+    data[sem].forEach(sub=>{
+        let row=table.insertRow();
+        row.insertCell(0).innerText=sub[0];
+        row.insertCell(1).innerText=sub[1];
+        row.insertCell(2).innerText=sub[2];
+
+        row.insertCell(3).innerHTML=`
+        <select class="grade">
+        <option value="10">O</option>
+        <option value="9">A+</option>
+        <option value="8">A</option>
+        <option value="7">B+</option>
+        <option value="6">B</option>
+        <option value="5">C</option>
+        <option value="0">U</option>
+        </select>`;
+    });
+}
+
+// GPA
+function calculateGPA(){
+    let grades=document.getElementsByClassName("grade");
+    let sem=document.getElementById("sem").value;
+
+    let totalCredits=0,totalPoints=0;
+
+    data[sem].forEach((sub,i)=>{
+        if(sub[2]==0) return;
+
+        let g=Number(grades[i].value);
+        totalCredits+=sub[2];
+        totalPoints+=sub[2]*g;
+    });
+
+    let gpa=totalPoints/totalCredits;
+    gpaStore[sem]=gpa;
+
+    document.getElementById("result").innerText=
+    "Semester "+sem+" GPA: "+gpa.toFixed(2);
+}
+
+// CGPA
+function calculateCGPA(){
+    let total=0,count=0;
+
+    for(let s in gpaStore){
+        total+=gpaStore[s];
+        count++;
+    }
+
+    if(count==0){
+        document.getElementById("cgpaResult").innerText="Calculate GPA first!";
+        return;
+    }
+
+    let cgpa=total/count;
+
+    document.getElementById("cgpaResult").innerText=
+    "Your CGPA is: "+cgpa.toFixed(2);
+}
+
+</script>
+
+</body>
+</html>
